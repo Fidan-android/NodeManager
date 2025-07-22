@@ -11,36 +11,24 @@ import kotlinx.coroutines.flow.StateFlow
 class TreeViewModel : ViewModel(), ITreeViewModel {
     private val rootNode = NodeModel(name = generateNodeName("root"))
 
-    private var nodes = mutableMapOf(rootNode.name to rootNode)
-
     private val _currentNode = MutableStateFlow<NodeModel>(rootNode)
     val currentNode: StateFlow<NodeModel> = _currentNode
 
-    private val nodeManager = Manager(nodes, rootNode.name)
+    private val nodeManager = Manager(rootNode)
 
     override fun onPush(node: NodeModel) {
-        nodeManager.push(node.name)
-        updateStateFromManager()
+        _currentNode.value = nodeManager.push(node.name)
     }
 
     override fun onBack() {
-        nodeManager.back()
-        updateStateFromManager()
+        _currentNode.value = nodeManager.back()
     }
 
     override fun onAddChild() {
-        nodeManager.addChild()
-        updateStateFromManager()
+        _currentNode.value = nodeManager.addChild()
     }
 
     override fun onRemoveCurrent() {
-        nodeManager.removeCurrent()
-        updateStateFromManager()
-    }
-
-    private fun updateStateFromManager() {
-        nodes = nodeManager.getAllNodes().toMutableMap()
-        val newId = nodeManager.getCurrentString()
-        _currentNode.value = nodes[newId]!!
+        _currentNode.value = nodeManager.removeCurrent()
     }
 }

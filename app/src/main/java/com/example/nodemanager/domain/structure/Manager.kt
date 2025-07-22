@@ -3,31 +3,32 @@ package com.example.nodemanager.domain.structure
 import com.example.nodemanager.domain.model.NodeModel
 import java.util.UUID
 
-class Manager(
-    private var nodes: Map<String, NodeModel>,
-    root: String
-) : IManager {
+class Manager(root: NodeModel) : IManager<NodeModel> {
 
-    private var currentString: String = root
+    private var currentString: String = root.name
+    private var nodes = mutableMapOf(root.name to root)
 
     override fun getAllNodes(): Map<String, NodeModel> = nodes
-    override fun getCurrentString(): String = currentString
 
-    private fun getCurrent(): NodeModel = nodes[currentString]!!
+    override fun getCurrent(): NodeModel = nodes[currentString]!!
 
-    override fun push(model: String) {
+    override fun push(model: String): NodeModel {
         if (nodes[currentString]?.children?.any { it.name == model } == true) {
             currentString = model
         }
+
+        return getCurrent()
     }
 
-    override fun back() {
+    override fun back(): NodeModel {
         nodes[currentString]?.parent?.let {
             currentString = it
         }
+
+        return getCurrent()
     }
 
-    override fun addChild() {
+    override fun addChild(): NodeModel {
         val newChild = NodeModel(name = UUID.randomUUID().toString(), parent = currentString)
         val current = getCurrent()
         val updatedCurrent = current.copy(children = current.children + newChild)
@@ -38,13 +39,15 @@ class Manager(
         }
 
         currentString = updatedCurrent.name
+
+        return getCurrent()
     }
 
-    override fun removeCurrent() {
+    override fun removeCurrent(): NodeModel {
         val current = getCurrent()
-        val parentString = current.parent ?: return
+        val parentString = current.parent ?: return getCurrent()
 
-        val parent = nodes[parentString] ?: return
+        val parent = nodes[parentString] ?: return getCurrent()
         val updatedParent = parent.copy(
             children = parent.children.filter { it.name != currentString }
         )
@@ -53,7 +56,8 @@ class Manager(
             put(updatedParent.name, updatedParent)
             remove(currentString)
         }
-
         currentString = updatedParent.name
+
+        return getCurrent()
     }
 }

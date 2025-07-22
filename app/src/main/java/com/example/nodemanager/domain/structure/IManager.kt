@@ -2,14 +2,14 @@ package com.example.nodemanager.domain.structure
 
 import com.example.nodemanager.domain.model.NodeModel
 
-interface IManager {
+interface IManager<T> {
     // getters
-    fun getCurrentString(): String
+    fun getCurrent(): T
     fun getAllNodes(): Map<String, NodeModel>
 
     // setters
-    fun push(model: String)
-    fun back()
-    fun addChild()
-    fun removeCurrent()
+    fun push(model: String):T
+    fun back():T
+    fun addChild():T
+    fun removeCurrent():T
 }
